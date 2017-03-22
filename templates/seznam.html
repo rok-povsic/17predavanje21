@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Seznam sporočil</title>
+</head>
+<body>
+    <h1>Sezam vseh sporočil</h1>
+
+    {% for sporocilo in sporocila %}
+        <p>
+            <a href="/posamezno-sporocilo/{{ sporocilo.key.id() }}">#</a>
+            <strong>
+                <em>({{ sporocilo.nastanek }})</em>
+                {{ sporocilo.ime }}:
+            </strong>
+            {{ sporocilo.vnos }}
+        </p>
+    {% endfor %}
+
+</body>
+</html>
