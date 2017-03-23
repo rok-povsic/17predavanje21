@@ -2,6 +2,7 @@
 import os
 import jinja2
 import webapp2
+import cgi
 
 from models import Sporocilo
 
@@ -34,8 +35,8 @@ class MainHandler(BaseHandler):
 
 class ShraniHandler(BaseHandler):
     def post(self):
-        sporocilo = self.request.get('sporocilo')
-        ime = self.request.get("ime")
+        sporocilo = cgi.escape(self.request.get('sporocilo'))
+        ime = cgi.escape(self.request.get("ime"))
 
         # Shrani sporocilo v bazo.
         spr = Sporocilo(vnos=sporocilo, ime=ime)
@@ -55,7 +56,47 @@ class PosameznoSporociloHandler(BaseHandler):
     def get(self, sporocilo_id):
         sporocilo = Sporocilo.get_by_id(int(sporocilo_id))
 
-        return self.write(sporocilo.ime + " " + sporocilo.vnos)
+        #return self.write(sporocilo.ime + " " + sporocilo.vnos)
+
+        spremenljivke = {
+            "sporocilo": sporocilo
+        }
+        return self.render_template(
+            "posamezno_sporocilo.html", spremenljivke)
+
+class UrediSporociloHandler(BaseHandler):
+    def get(self, sporocilo_id):
+        sporocilo = Sporocilo.get_by_id(int(sporocilo_id))
+        spremenljivke = {
+            "sporocilo": sporocilo
+        }
+        return self.render_template(
+            "uredi_sporocilo.html", spremenljivke)
+
+    def post(self, sporocilo_id):
+        sporocilo = Sporocilo.get_by_id(int(sporocilo_id))
+        sporocilo.ime = self.request.get("ime")
+        sporocilo.vnos = self.request.get("sporocilo")
+        sporocilo.put()
+
+        return self.redirect("/vsa-sporocila")
+
+class IzbrisiSporociloHandler(BaseHandler):
+    def get(self, sporocilo_id):
+        sporocilo = Sporocilo.get_by_id(int(sporocilo_id))
+        spremenljivke = {
+            "sporocilo": sporocilo
+        }
+        return self.render_template(
+            "izbrisi_sporocilo.html", spremenljivke)
+
+    def post(self, sporocilo_id):
+        sporocilo = Sporocilo.get_by_id(int(sporocilo_id))
+        sporocilo.key.delete()
+
+        return self.write("Izbrisano.")
+
+
 
 app = webapp2.WSGIApplication([
     webapp2.Route('/', MainHandler),
@@ -64,4 +105,10 @@ app = webapp2.WSGIApplication([
     webapp2.Route(
         '/posamezno-sporocilo/<sporocilo_id:\d+>',
         PosameznoSporociloHandler),
+    webapp2.Route(
+        '/posamezno-sporocilo/<sporocilo_id:\d+>/uredi',
+        UrediSporociloHandler),
+    webapp2.Route(
+        '/posamezno-sporocilo/<sporocilo_id:\d+>/izbrisi',
+        IzbrisiSporociloHandler),
 ], debug=True)
