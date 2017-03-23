@@ -1,1 +1,1 @@
-# Predavanje 18
+# Predavanje 19	
