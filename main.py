@@ -4,6 +4,8 @@ import jinja2
 import webapp2
 import cgi
 
+from google.appengine.api import users
+
 from models import Sporocilo
 
 template_dir = os.path.join(os.path.dirname(__file__), "templates")
@@ -31,18 +33,40 @@ class BaseHandler(webapp2.RequestHandler):
 
 class MainHandler(BaseHandler):
     def get(self):
-        return self.render_template("hello.html")
+        user = users.get_current_user()
+        if user:
+            logiran = True
+            logout_url = users.create_logout_url("/")
+            spr = {
+                "user": user,
+                "logiran": logiran,
+                "logout_url": logout_url,
+            }
+        else:
+            logiran = False
+            login_url = users.create_login_url("/")
+            spr = {
+                "user": user,
+                "logiran": logiran,
+                "login_url": login_url,
+            }
+        return self.render_template("hello.html", spr)
 
 class ShraniHandler(BaseHandler):
     def post(self):
         sporocilo = cgi.escape(self.request.get('sporocilo'))
-        ime = cgi.escape(self.request.get("ime"))
 
-        # Shrani sporocilo v bazo.
-        spr = Sporocilo(vnos=sporocilo, ime=ime)
-        spr.put()
+        user = users.get_current_user()
+        if user:
+            ime = user.nickname()
 
-        return self.write("Shranjeno.")
+            # Shrani sporocilo v bazo.
+            spr = Sporocilo(vnos=sporocilo, ime=ime)
+            spr.put()
+
+            return self.write("Shranjeno.")
+        else:
+            return self.write("Ni ti uspelo.")
 
 class VsaSporocilaHandler(BaseHandler):
     def get(self):
