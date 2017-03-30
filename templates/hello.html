@@ -10,11 +10,18 @@
     <h1>Sporocila!</h1>
     <form method="post" action="/shrani">
         <p>Ime: <input name="ime"></p>
-        <p>Sporočilo: <input name="sporocilo"></p>
+        <p><img src="http://zanzlanz.com/img/SpinningSmiley.gif" onclick="klikSlike()"></p>
+        <p>Sporočilo: <textarea name="sporocilo" id="sporocilo" rows="5" cols="50"></textarea></p>
         <button type="submit">Pošlji</button>
     </form>
     <p>
         <a href="/vsa-sporocila">Vsa sporočila</a>
     </p>
+
+    <script>
+        function klikSlike() {
+            document.getElementById("sporocilo").value += ":smesko:";
+        }
+    </script>
 </body>
 </html>
